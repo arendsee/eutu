@@ -3,6 +3,8 @@
 import argparse
 import httplib2
 import sys
+import xml.etree.ElementTree as etree
+import io
 
 __version__ = '0.0.0'
 __prog__ = 'eutu'
@@ -112,6 +114,21 @@ class Litsrc(Subcommand):
         pass
 
 
+# ====
+# Guts
+# ====
+
+def parse_xml(xmlstring):
+    tree = etree.parse(io.StringIO(xmlstring))
+    term = dict()
+    for key in ('QueryKey', 'WebEnv', 'Count', 'RetMax'):
+        try:
+            value = tree.getroot().findall('.//' + key)[0].text
+        except IndexError:
+           continue
+        term[key] = value
+    term['ids'] = tuple(x.text for x in tree.getroot().findall('.//IdList/Id'))
+    return(term)
 
 if __name__ == '__main__':
     args = parse()
@@ -120,11 +137,12 @@ if __name__ == '__main__':
 
     h = httplib2.Http(args.cache)
 
-    base = "%s/esearch.fcgi?db=pubmed&term=%s&retmax=%d"
+    base = "%s/esearch.fcgi?db=pubmed&term=%s&retmax=%d&usehistory=y"
     url = base % (ENTREZ, args.term, args.retmax)
-    print(url)
     response, content = h.request(url)
 
-    records = content.decode().strip().split("\n")
+    xmlstring = content.decode()
 
-    print(records)
+    print(xmlstring)
+
+    print(parse_xml(xmlstring))
