@@ -9,6 +9,10 @@ __prog__ = 'eutu'
 
 ENTREZ = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 
+# ===============
+# Command Parsing
+# ===============
+
 class Parser:
     def __init__(self):
         self.parser = self._build_base_parser()
@@ -68,6 +72,11 @@ def parse(argv=None):
 
     return(args)
 
+
+# ===========
+# Subcommands
+# ===========
+
 class Subcommand:
     def __init__(self, parser_obj):
         self.func = self.write
@@ -80,7 +89,6 @@ class Subcommand:
 
     def write(self, args, gen, out=sys.stdout):
         raise NotImplemented
-
 
 class Litsrc(Subcommand):
     def _parse(self):
@@ -104,5 +112,19 @@ class Litsrc(Subcommand):
         pass
 
 
+
 if __name__ == '__main__':
     args = parse()
+    if args.debug:
+        httplib2.debuglevel = 1
+
+    h = httplib2.Http(args.cache)
+
+    base = "%s/esearch.fcgi?db=pubmed&term=%s&retmax=%d"
+    url = base % (ENTREZ, args.term, args.retmax)
+    print(url)
+    response, content = h.request(url)
+
+    records = content.decode().strip().split("\n")
+
+    print(records)
