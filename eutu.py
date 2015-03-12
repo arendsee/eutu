@@ -25,16 +25,6 @@ class Parser:
             action='version',
             version='%s %s' % (__prog__, __version__)
         )
-        parser.add_argument(
-            '--cache',
-            help='Set a caching directory'
-        )
-        parser.add_argument(
-            '--debug',
-            help='Print HTTP request data',
-            action='store_true',
-            default=False
-        )
         return(parser)
 
     def _build_subparsers(self):
@@ -42,6 +32,24 @@ class Parser:
             metavar='[ for help on each: %(prog)s <subcommand> -h ]',
             title='subcommands')
         return(subparsers)
+
+def build_common_options(parser, args):
+    if('retmax' in args):
+        parser.add_argument(
+            '-r', '--retmax',
+            help="Maximum number of records to retrieve",
+            default=10
+        )
+    parser.add_argument(
+        '--cache',
+        help='Set a caching directory'
+    )
+    parser.add_argument(
+        '--debug',
+        help='Print HTTP request data',
+        action='store_true',
+        default=False
+    )
 
 def parse(argv=None):
     parser = Parser()
@@ -86,6 +94,7 @@ class Litsrc(Subcommand):
             '-t', '--term',
             help="Pubmed query term"
         )
+        build_common_options(parser=parser, args=('retmax'))
         parser.set_defaults(func=self.func)
 
     def generator(self, args, gen):
