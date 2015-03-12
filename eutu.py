@@ -13,17 +13,27 @@ class Parser:
     def __init__(self):
         self.parser = self._build_base_parser()
         self.subparsers = self._build_subparsers()
-        self.usage = __prog__ + ' {} <options>'
+        self.usage = __prog__ + ' <global options> {} < subcommand options>'
 
     def _build_base_parser(self):
         parser = argparse.ArgumentParser(
             prog=__prog__,
-            usage='%(prog)s <subcommand> <options>',
-            description='Tools for studying and manipulating fasta files')
+            usage='%s <global options> <subcommand> <subcommand options>' % __prog__,
+            description='An entrez query tool')
         parser.add_argument(
             '-v', '--version',
             action='version',
-            version='%(prog)s {}'.format(__version__)
+            version='%s %s' % (__prog__, __version__)
+        )
+        parser.add_argument(
+            '--cache',
+            help='Set a caching directory'
+        )
+        parser.add_argument(
+            '--debug',
+            help='Print HTTP request data',
+            action='store_true',
+            default=False
         )
         return(parser)
 
@@ -34,7 +44,6 @@ class Parser:
         return(subparsers)
 
 def parse(argv=None):
-
     parser = Parser()
 
     subcommands = [Litsrc]
@@ -79,14 +88,12 @@ class Litsrc(Subcommand):
         )
         parser.set_defaults(func=self.func)
 
-
     def generator(self, args, gen):
         pass
 
     def write(self, args, out=sys.stdout):
-        print("Query: %s" % args.term, file=out)
+        pass
 
 
 if __name__ == '__main__':
-
     args = parse()
