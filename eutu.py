@@ -130,6 +130,12 @@ def parse_xml(xmlstring):
     term['ids'] = tuple(x.text for x in tree.getroot().findall('.//IdList/Id'))
     return(term)
 
+def fetch(webenv, querykey, db, args):
+    base = "%s/efetch.fcgi?&retmax=%d&query_key=%s&WebEnv=%s&db=%s&rettype=text"
+    url = base % (ENTREZ, args.retmax, querykey, webenv, db)
+    response, content = h.request(url)
+    return(content.decode())
+
 if __name__ == '__main__':
     args = parse()
     if args.debug:
@@ -143,6 +149,10 @@ if __name__ == '__main__':
 
     xmlstring = content.decode()
 
-    print(xmlstring)
+    terms = parse_xml(xmlstring)
 
-    print(parse_xml(xmlstring))
+    output = fetch(webenv=terms['WebEnv'],
+                   querykey=terms['QueryKey'],
+                   db='pubmed',
+                   args=args)
+    print(output)
