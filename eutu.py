@@ -44,6 +44,7 @@ def build_common_options(parser, args):
         parser.add_argument(
             '-r', '--retmax',
             help="Maximum number of records to retrieve",
+            type=int,
             default=10
         )
     parser.add_argument(
